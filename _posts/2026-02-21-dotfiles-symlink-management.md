@@ -144,10 +144,10 @@ fi
 실제로 두 번째 실행 시 출력:
 
 ```
-OK: /home/user/.bashrc -> /home/user/workspace/dotfiles/.bashrc (already linked)
-OK: /home/user/.gitconfig -> /home/user/workspace/dotfiles/.gitconfig (already linked)
-OK: /home/user/.vimrc -> /home/user/workspace/dotfiles/.vimrc (already linked)
-OK: /home/user/.claude/commands/blog.md -> /home/user/workspace/dotfiles/.claude/commands/blog.md (already linked)
+OK: /home/user/.bashrc -> /home/user/dotfiles/.bashrc (already linked)
+OK: /home/user/.gitconfig -> /home/user/dotfiles/.gitconfig (already linked)
+OK: /home/user/.vimrc -> /home/user/dotfiles/.vimrc (already linked)
+OK: /home/user/.claude/commands/blog.md -> /home/user/dotfiles/.claude/commands/blog.md (already linked)
 Done!
 ```
 
@@ -182,13 +182,13 @@ mkdir -p "$(dirname "$dest")"
 ## 심볼릭 링크의 동작 원리
 
 심볼릭 링크는 **원본 파일을 가리키는 바로가기**다.
-`~/.bashrc`를 편집하면 실제로 `~/workspace/dotfiles/.bashrc`가 수정된다.
+`~/.bashrc`를 편집하면 실제로 `~/dotfiles/.bashrc`가 수정된다.
 
 ```
-~/.bashrc              -> ~/workspace/dotfiles/.bashrc
-~/.gitconfig           -> ~/workspace/dotfiles/.gitconfig
-~/.vimrc               -> ~/workspace/dotfiles/.vimrc
-~/.claude/commands/blog.md -> ~/workspace/dotfiles/.claude/commands/blog.md
+~/.bashrc              -> ~/dotfiles/.bashrc
+~/.gitconfig           -> ~/dotfiles/.gitconfig
+~/.vimrc               -> ~/dotfiles/.vimrc
+~/.claude/commands/blog.md -> ~/dotfiles/.claude/commands/blog.md
 ```
 
 즉, 홈 디렉토리에서 설정을 수정해도 dotfiles 저장소 안의 파일이 바뀌므로 `git diff`로 변경 사항을 확인하고 커밋할 수 있다.
@@ -198,8 +198,8 @@ mkdir -p "$(dirname "$dest")"
 ## 새 PC에서 환경 세팅하기
 
 ```bash
-git clone git@github.com:qudtjs0753/dotfiles.git ~/workspace/dotfiles
-cd ~/workspace/dotfiles
+git clone git@github.com:qudtjs0753/dotfiles.git ~/dotfiles
+cd ~/dotfiles
 chmod +x install.sh
 ./install.sh
 ```
@@ -241,7 +241,7 @@ chmod +x install.sh
 예를 들어 `.tmux.conf`를 추가하려면:
 
 ```bash
-cp ~/.tmux.conf ~/workspace/dotfiles/.tmux.conf
+cp ~/.tmux.conf ~/dotfiles/.tmux.conf
 ```
 
 ```bash

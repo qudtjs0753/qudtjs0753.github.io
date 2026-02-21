@@ -40,6 +40,11 @@ gh run view <run-id> --repo qudtjs0753/qudtjs0753.github.io --log
 - 기존 카테고리 중 맞는 것이 있으면 사용하고, 없으면 새로 만든다
 - **tags**: 카테고리와 겹치지 않게 지정한다 (예: 카테고리가 `Vim`이면 태그에 `vim`을 넣지 않는다)
 
+## 블로그 글 작성 시 개인정보 주의
+
+- 블로그 포스트에 실제 개인 폴더 경로(예: `/home/helloworld/`, `/home/사용자명/workspace/` 등)를 절대 포함하지 않는다
+- 경로 예시가 필요하면 `~/dotfiles`, `/home/user/dotfiles` 같은 일반적인 표현을 사용한다
+
 ## _config.yml 수정 시 주의
 
 - 155줄 이후 설정은 수정하지 않기 (Chirpy 테마 동작에 필요)
