@@ -216,3 +216,11 @@ dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/font "'Hack Nerd Font
 | `~/.bashrc` | Oh My Bash 테마 비활성화 + Starship init 추가 |
 | `~/.config/starship.toml` | Gruvbox Rainbow 프리셋 |
 | `~/.local/share/fonts/` | Hack Nerd Font 설치 |
+
+---
+
+## 최종 결과
+
+![터미널 커스터마이징 완료](/assets/img/posts/2026-02-21-terminal-customization/result.png)
+
+Gruvbox Dark 색상 테마, Starship Gruvbox Rainbow 프롬프트, Hack Nerd Font Mono가 적용된 모습이다.
