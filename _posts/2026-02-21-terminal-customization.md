@@ -118,6 +118,67 @@ PROMPT_COMMAND → starship_precmd() → PS1 설정 (starship 바이너리 호�
 
 Starship 바이너리는 Rust로 작성되어 있어서 git 상태 파싱, 언어 버전 감지 등을 빠르게 수행하고, `~/.config/starship.toml` 설정에 따라 프롬프트를 렌더링한다.
 
+### eval "$(starship init bash)"는 무엇을 하는가
+
+이 한 줄은 2단계에 걸쳐 동작한다.
+
+**1단계**: `$()`는 명령어 치환이다. 안에 있는 명령어를 실행하고 출력 결과를 문자열로 바꿔치기한다.
+
+```bash
+starship init bash
+# 출력: eval -- "$(starship init bash --print-full-init)"
+```
+
+**2단계**: `eval`은 받은 문자열을 bash 코드로 실행한다. 위 출력이 다시 실행되면서 `--print-full-init`이 호출되고, 실제 초기화 스크립트가 출력된다. `eval`이 이 스크립트를 현재 셸에서 실행한다.
+
+```
+eval "$(starship init bash)"
+│      └─ 1. starship init bash 실행
+│         → 출력: 'eval -- "$(starship init bash --print-full-init)"'
+│
+└─ 2. eval이 그 출력을 코드로 실행
+      → starship init bash --print-full-init 실행
+      → 출력: starship_precmd() 함수 정의 + PROMPT_COMMAND 등록 스크립트
+      → eval이 그 스크립트를 현재 셸에서 실행
+```
+
+초기화 스크립트에서 PROMPT_COMMAND를 등록하는 핵심 부분:
+
+```bash
+# PROMPT_COMMAND가 비어있으면 바로 등록
+if [[ -z "${PROMPT_COMMAND-}" ]]; then
+    PROMPT_COMMAND="starship_precmd"
+
+# 이미 뭔가 있으면 (Oh My Bash 등) 백업 후 교체
+elif [[ "$PROMPT_COMMAND" != *"starship_precmd"* ]]; then
+    STARSHIP_PROMPT_COMMAND="$PROMPT_COMMAND"
+    PROMPT_COMMAND="starship_precmd"
+fi
+```
+
+기존 `PROMPT_COMMAND`를 덮어쓰는 게 아니라 `STARSHIP_PROMPT_COMMAND`에 백업해두고, `starship_precmd` 안에서 실행해준다:
+
+```bash
+starship_precmd() {
+    STARSHIP_CMD_STATUS=$?  # 이전 명령어 종료 코드 저장
+
+    # 백업해둔 기존 PROMPT_COMMAND 실행
+    if [[ -n "${STARSHIP_PROMPT_COMMAND-}" ]]; then
+        eval "$STARSHIP_PROMPT_COMMAND"
+    fi
+
+    # starship 바이너리를 호출해서 PS1 생성
+    PS1="$(/home/helloworld/.local/bin/starship prompt "${ARGS[@]}")"
+}
+```
+
+`echo`로 바꾸면 실행 없이 출력만 볼 수 있다:
+
+```bash
+echo "$(starship init bash)"           # 1단계 출력
+starship init bash --print-full-init   # 2단계 출력 (전체 스크립트)
+```
+
 ### bash는 PROMPT_COMMAND를 언제 실행하는가
 
 bash 5.2 소스코드의 `eval.c`를 보면 두 함수가 핵심이다.
