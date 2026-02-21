@@ -1,8 +1,8 @@
 ---
 title: "첫 번째 블로그 포스트"
 date: 2026-02-16 12:00:00 +0900
-categories: [Blogging, Tutorial]
-tags: [hello, jekyll, chirpy, claude]
+categories: [Blogging]
+tags: [info]
 ---
 
 

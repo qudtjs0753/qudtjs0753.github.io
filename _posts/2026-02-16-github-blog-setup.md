@@ -1,8 +1,8 @@
 ---
 title: "GitHub 블로그 만들기"
 date: 2026-02-16 15:00:00 +0900
-categories: [Blogging, Tutorial]
-tags: [github, jekyll, chirpy, ruby, blog]
+categories: [Blogging]
+tags: [setup]
 ---
 
 Jekyll + Chirpy 테마를 사용하여 GitHub Pages 블로그를 만드는 전체 과정을 정리한 글이다.
@@ -41,7 +41,7 @@ Ruby는 C 언어로 작성되어 있어서, 소스 코드에서 컴파일할 때
 
 > `-dev`가 붙은 패키지는 **개발용 헤더 파일**을 포함한다. 런타임 라이브러리는 이미 시스템에 있을 수 있지만, 소스 컴파일 시에는 헤더 파일(`.h`)이 필요하다.
 {: .prompt-info }
-> '
+
 #### 설치 명령어
 
 ```bash
@@ -262,14 +262,14 @@ Chirpy 테마 개발자(cotes2020)가 제공하는 **블로그 시작용 템플�
 
 #### 2-1. 템플릿 다운로드
 ```bash
-git clone https://github.com/cotes2020/chirpy-starter.git qudtjs0753.github.io
+git clone https://github.com/cotes2020/chirpy-starter.git your-username.github.io
 ```
 - `git clone`: 원격 저장소를 복제
-- `qudtjs0753.github.io`: 복제할 폴더 이름 (GitHub Pages 규칙: `<username>.github.io`)
+- `your-username.github.io`: 복제할 폴더 이름 (GitHub Pages 규칙: `<username>.github.io`)
 
 #### 2-2. git 히스토리 초기화
 ```bash
-cd qudtjs0753.github.io
+cd your-username.github.io
 rm -rf .git    # 템플릿의 git 히스토리 삭제
 git init        # 새로운 git 저장소 시작
 ```
@@ -286,7 +286,7 @@ bundle install
 ### 3. 프로젝트 구조
 
 ```
-qudtjs0753.github.io/
+your-username.github.io/
 ├── _config.yml              # 블로그 전체 설정 (제목, URL, 언어 등)
 ├── _posts/                  # 블로그 글을 넣는 폴더
 │   └── 2026-02-16-hello-world.md
@@ -337,9 +337,9 @@ qudtjs0753.github.io/
 | `title` | `Chirpy` | `가보자` | 블로그 제목 |
 | `tagline` | `A text-focused Jekyll theme` | `무의식적 기록` | 부제목 |
 | `description` | `A minimal, responsive...` | `아무거나 다쓰는 곳` | SEO 설명 |
-| `url` | (비어있음) | `https://qudtjs0753.github.io` | 블로그 주소 |
-| `github.username` | `github_username` | `qudtjs0753` | GitHub 유저명 |
-| `social.name` | `your_full_name` | `kbs` | 저자 이름 |
+| `url` | (비어있음) | `https://your-username.github.io` | 블로그 주소 |
+| `github.username` | `github_username` | `your-username` | GitHub 유저명 |
+| `social.name` | `your_full_name` | `your-name` | 저자 이름 |
 
 ### `_config.yml`이란?
 
@@ -370,16 +370,16 @@ Jekyll의 **전역 설정 파일**이다. YAML(Yet Another Markup Language) 형�
 - HTML의 `<meta name="description">` 태그에 들어감
 - Google 검색 결과에서 블로그 이름 아래에 표시되는 텍스트
 
-#### `url: "https://qudtjs0753.github.io"`
+#### `url: "https://your-username.github.io"`
 - 블로그의 **전체 주소**
 - 사이트맵, RSS 피드, canonical URL 등에 사용
 - 끝에 `/`를 붙이지 않는다
 
-#### `github.username: qudtjs0753`
+#### `github.username: your-username`
 - 사이드바에 GitHub 아이콘 링크로 표시됨
-- 클릭하면 `https://github.com/qudtjs0753`으로 이동
+- 클릭하면 `https://github.com/your-username`으로 이동
 
-#### `social.name: kbs`
+#### `social.name: your-name`
 - 포스트의 **기본 저자 이름**으로 표시
 - 페이지 하단 copyright에도 사용됨
 
@@ -394,7 +394,7 @@ Jekyll의 **전역 설정 파일**이다. YAML(Yet Another Markup Language) 형�
 | `analytics.google.id` | Google Analytics | 방문자 분석이 필요할 때 |
 | `theme_mode` | 다크/라이트 모드 | 기본 테마를 고정하고 싶을 때 |
 
-#### 수정하면 안 되는 것들 (155줄 이후)
+#### 수정하면 안 되는 것들
 ```yaml
 # ------------ The following options are not recommended to be modified --
 kramdown:       # Markdown 렌더링 설정
@@ -465,7 +465,7 @@ YYYY-MM-DD-제목.md
 ---
 title: "첫 번째 블로그 포스트"
 date: 2026-02-16 12:00:00 +0900
-categories: [Blogging, Tutorial]
+categories: [Blogging]
 tags: [hello, jekyll, chirpy]
 ---
 ```
@@ -537,7 +537,6 @@ tags: [hello, jekyll, chirpy]
 
 #### 실행 명령어
 ```bash
-cd /home/helloworld/workspace/qudtjs0753.github.io
 bundle exec jekyll serve
 ```
 
@@ -546,18 +545,6 @@ bundle exec jekyll serve
 2. **서버 실행**: 생성된 파일을 `http://127.0.0.1:4000`에서 제공
 3. **파일 감시**: 파일이 변경되면 자동으로 다시 빌드 (live reload)
 
-#### 실행 시 출력 내용
-```
-Configuration file: /home/helloworld/workspace/qudtjs0753.github.io/_config.yml
-            Source: /home/helloworld/workspace/qudtjs0753.github.io
-       Destination: /home/helloworld/workspace/qudtjs0753.github.io/_site
- Incremental build: disabled. Enable with --incremental
-      Generating...
-                    done in 0.593 seconds.
- Auto-regeneration: enabled for '/home/helloworld/workspace/qudtjs0753.github.io'
-    Server address: http://127.0.0.1:4000/
-  Server running... press ctrl-c to stop.
-```
 
 ### `_site/` 폴더
 
@@ -623,8 +610,8 @@ bundle exec jekyll serve --port 5000
 <meta property="og:title" content="가보자" />         <!-- title: 가보자 -->
 <meta name="description" content="아무거나 다쓰는 곳" /> <!-- description -->
 <meta property="og:site_name" content="가보자" />
-"name":"kbs"                                         <!-- social.name: kbs -->
-"sameAs":["https://github.com/qudtjs0753"]          <!-- social.links -->
+"name":"your-name"                                         <!-- social.name: your-name -->
+"sameAs":["https://github.com/your-username"]          <!-- social.links -->
 ```
 
 ---
@@ -663,20 +650,16 @@ GitHub Actions 시작
 3. bundle exec jekyll build (HTML 빌드)
 4. 빌드 결과물을 GitHub Pages에 배포
     ↓
-https://qudtjs0753.github.io 에서 접속 가능
+https://your-username.github.io 에서 접속 가능
 ```
 
 ### 2. 배포 결과 확인
 
 ```bash
-gh run list --repo qudtjs0753/qudtjs0753.github.io --limit 5
+gh run list --repo your-username/your-username.github.io --limit 5
 ```
 
 ```
 completed  success  Initial blog setup with Chirpy theme  Build and Deploy         main  push     1m8s
 completed  success  pages build and deployment            pages-build-deployment   main  dynamic  25s
 ```
-
-- **Build and Deploy** (1분 8초): Chirpy의 워크플로우가 Jekyll 빌드 수행
-- **pages-build-deployment** (25초): GitHub이 빌드 결과물을 Pages에 배포
-

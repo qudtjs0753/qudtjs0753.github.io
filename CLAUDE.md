@@ -34,9 +34,14 @@ gh run view <run-id> --repo qudtjs0753/qudtjs0753.github.io --log
 - 형식: `YYYY-MM-DD-제목.md`
 - 영어 소문자 + 하이픈 권장
 
+## 포스트 front matter 규칙
+
+- **categories**: 반드시 하나만 지정한다 (예: `categories: [Vim]`)
+- 기존 카테고리 중 맞는 것이 있으면 사용하고, 없으면 새로 만든다
+- **tags**: 카테고리와 겹치지 않게 지정한다 (예: 카테고리가 `Vim`이면 태그에 `vim`을 넣지 않는다)
+
 ## _config.yml 수정 시 주의
 
-- 수정 후 Jekyll 서버 재시작 필요 (일반 포스트는 자동 반영)
 - 155줄 이후 설정은 수정하지 않기 (Chirpy 테마 동작에 필요)
 
 ## 기술 스택
