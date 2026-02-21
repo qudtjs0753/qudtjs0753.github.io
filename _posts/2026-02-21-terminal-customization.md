@@ -6,6 +6,7 @@ tags: [terminal, starship, gruvbox, nerd-font]
 ---
 
 Ubuntu의 기본 터미널(GNOME Terminal)은 보라색 Yaru 테마에 밋밋한 프롬프트가 기본이다. 이번 글에서는 터미널 색상, 프롬프트, 폰트를 커스터마이징한 과정을 정리한다.
+최종 구성과 결과를 먼저 보여주고, 설정 방법과 부연 설명은 그 뒤에 작성.
 
 ---
 
@@ -16,6 +17,25 @@ Ubuntu의 기본 터미널(GNOME Terminal)은 보라색 Yaru 테마에 밋밋한
 | 색상 테마 | Yaru (보라색) | **Gruvbox Dark** |
 | 프롬프트 | Oh My Bash `font` 테마 | **Starship** (Gruvbox Rainbow) |
 | 폰트 | 시스템 기본 | **Hack Nerd Font Mono** |
+
+---
+
+## 최종 변경 파일 요약
+
+| 파일 | 변경 내용 |
+|------|-----------|
+| `~/.bashrc` | Oh My Bash 테마 비활성화 + Starship init 추가 |
+| `~/.config/starship.toml` | Gruvbox Rainbow 프리셋 |
+| `~/.local/share/fonts/` | Hack Nerd Font 설치 |
+
+---
+
+
+## 최종 결과
+
+![터미널 커스터마이징 완료](/assets/img/posts/2026-02-21-terminal-customization/result.png)
+
+Gruvbox Dark 색상 테마, Starship Gruvbox Rainbow 프롬프트, Hack Nerd Font Mono가 적용된 모습이다.
 
 ---
 
@@ -335,21 +355,3 @@ fi
 2. eval "$(starship init bash)"
    └── PROMPT_COMMAND에 starship 등록 → PS1 담당
 ```
-
----
-
-## 최종 변경 파일 요약
-
-| 파일 | 변경 내용 |
-|------|-----------|
-| `~/.bashrc` | Oh My Bash 테마 비활성화 + Starship init 추가 |
-| `~/.config/starship.toml` | Gruvbox Rainbow 프리셋 |
-| `~/.local/share/fonts/` | Hack Nerd Font 설치 |
-
----
-
-## 최종 결과
-
-![터미널 커스터마이징 완료](/assets/img/posts/2026-02-21-terminal-customization/result.png)
-
-Gruvbox Dark 색상 테마, Starship Gruvbox Rainbow 프롬프트, Hack Nerd Font Mono가 적용된 모습이다.
