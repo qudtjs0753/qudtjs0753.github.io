@@ -21,8 +21,6 @@ Ubuntu의 기본 터미널(GNOME Terminal)은 보라색 Yaru 테마에 밋밋한
 
 ## 1. 터미널 색상 변경 — Gruvbox Dark
 
-GNOME Terminal의 색상은 `dconf`로 변경할 수 있다. `dconf`는 GNOME 데스크톱의 설정 저장소로, 윈도우의 레지스트리와 비슷한 개념이다. GUI에서 환경설정을 바꾸는 것과 동일한 결과를 CLI로 수행한다.
-
 ```bash
 PROFILE="$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d \')"
 
@@ -35,11 +33,95 @@ dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/palette \
   "['#282828', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#a89984', '#928374', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']"
 ```
 
-Gruvbox는 따뜻한 갈색-검정 배경에 크림색 글자가 특징인 레트로 다크 테마다.
+Gruvbox는 따뜻한 갈색-검정 배경에 크림색 글자가 특징인 레트로 다크 테마다. `dconf`는 GNOME 데스크톱의 설정 저장소로, 윈도우의 레지스트리와 비슷한 개념이다. GUI에서 환경설정을 바꾸는 것과 동일한 결과를 CLI로 수행한다.
 
 ---
 
-## 2. 프롬프트 교체 — Oh My Bash에서 Starship으로
+## 2. Nerd Font 설치
+
+```bash
+mkdir -p ~/.local/share/fonts
+cd ~/.local/share/fonts
+
+# Hack Nerd Font 다운로드
+curl -fLO "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz"
+tar -xf Hack.tar.xz && rm Hack.tar.xz
+
+# 폰트 캐시 갱신
+fc-cache -fv ~/.local/share/fonts
+```
+
+GNOME Terminal에 폰트 적용:
+
+```bash
+PROFILE="$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d \')"
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/use-system-font "false"
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/font "'Hack Nerd Font Mono 11'"
+```
+
+> **주의**: `fc-cache -fv`로 폰트 캐시를 반드시 갱신해야 한다. 캐시가 갱신되지 않으면 GNOME Terminal에서 글자 간격이 깨질 수 있다.
+
+### 왜 Nerd Font가 필요한가
+
+Starship의 Gruvbox Rainbow 프리셋에는 OS 로고, git 심볼, 파워라인 구분선 같은 특수 아이콘이 포함되어 있다. 이 아이콘은 **Nerd Font**에만 있는 글리프이므로, 일반 폰트에서는 네모(□)로 깨진다. Starship을 설치하기 전에 먼저 폰트를 세팅해야 한다.
+
+### Nerd Font 변형 구분
+
+| 변형 | 설명 |
+|------|------|
+| `Nerd Font` | 아이콘이 원래 너비 (가변폭) |
+| `Nerd Font Mono` | 아이콘이 1칸 고정폭 |
+| `Nerd Font Propo` | 비례폭(proportional) |
+| `NL` 접미사 | No Ligature — 리거처 제거 |
+
+터미널에서는 **Mono** 변형을 쓰는 게 정석이다.
+
+### 폰트 캐시란
+
+`.bashrc`는 텍스트 파일이라 bash가 매번 직접 읽는다. 캐시가 없으므로 수정하면 즉시 반영된다.
+
+폰트는 다르다. GNOME Terminal이 폰트를 쓸 때 폰트 파일을 직접 스캔하지 않고 **fontconfig** 라이브러리의 **캐시 파일**(바이너리 인덱스)을 통해 접근한다:
+
+```
+[폰트 설치 시]
+~/.local/share/fonts/에 .ttf 파일 복사
+  → 파일은 있지만, fontconfig 캐시에는 아직 없음
+  → GNOME Terminal이 폰트 목록을 캐시에서 읽음 → 새 폰트를 모름
+
+[fc-cache 실행 후]
+fc-cache -fv
+  → fontconfig가 폰트 디렉토리를 스캔
+  → 캐시 파일 재생성 (~/.cache/fontconfig/)
+  → GNOME Terminal이 캐시를 다시 읽음 → 새 폰트 인식
+```
+
+폰트 디렉토리에는 수백~수천 개의 바이너리 파일이 있을 수 있으므로, 매번 스캔하면 느려서 캐시를 쓴다.
+
+---
+
+## 3. 프롬프트 교체 — Oh My Bash에서 Starship으로
+
+### 설치 및 설정
+
+```bash
+# Starship 설치 (~/.local/bin에, sudo 불필요)
+curl -sS https://starship.rs/install.sh | sh -s -- -y -b ~/.local/bin
+
+# Gruvbox Rainbow 프리셋 적용
+~/.local/bin/starship preset gruvbox-rainbow -o ~/.config/starship.toml
+```
+
+`~/.bashrc` 수정:
+
+```bash
+# Oh My Bash 테마 비활성화
+OSH_THEME=""
+
+# 파일 맨 아래에 추가
+eval "$(~/.local/bin/starship init bash)"
+```
+
+이 프리셋은 파워라인 스타일로 각 섹션이 주황 → 노랑 → 청록 → 파랑 → 회색으로 이어진다.
 
 ### Oh My Bash의 구조
 
@@ -168,7 +250,7 @@ starship_precmd() {
     fi
 
     # starship 바이너리를 호출해서 PS1 생성
-    PS1="$(/home/helloworld/.local/bin/starship prompt "${ARGS[@]}")"
+    PS1="$(starship prompt "${ARGS[@]}")"
 }
 ```
 
@@ -253,70 +335,6 @@ fi
 2. eval "$(starship init bash)"
    └── PROMPT_COMMAND에 starship 등록 → PS1 담당
 ```
-
-### Starship 설치
-
-```bash
-# ~/.local/bin에 설치 (sudo 불필요)
-curl -sS https://starship.rs/install.sh | sh -s -- -y -b ~/.local/bin
-```
-
-### Gruvbox Rainbow 프리셋 적용
-
-```bash
-~/.local/bin/starship preset gruvbox-rainbow -o ~/.config/starship.toml
-```
-
-이 프리셋은 파워라인 스타일로 각 섹션이 주황 → 노랑 → 청록 → 파랑 → 회색으로 이어진다.
-
-### bashrc 설정
-
-```bash
-# ~/.bashrc 에서
-OSH_THEME=""  # Oh My Bash 테마 비활성화
-
-# 파일 맨 아래에 추가
-eval "$(~/.local/bin/starship init bash)"
-```
-
----
-
-## 3. Nerd Font 설치
-
-Starship의 Gruvbox Rainbow 프리셋에는 OS 로고, git 심볼, 파워라인 구분선 같은 특수 아이콘이 포함되어 있다. 이 아이콘은 **Nerd Font**에만 있는 글리프이므로, 일반 폰트에서는 네모(□)로 깨진다.
-
-```bash
-mkdir -p ~/.local/share/fonts
-cd ~/.local/share/fonts
-
-# Hack Nerd Font 다운로드
-curl -fLO "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz"
-tar -xf Hack.tar.xz && rm Hack.tar.xz
-
-# 폰트 캐시 갱신
-fc-cache -fv ~/.local/share/fonts
-```
-
-### GNOME Terminal에 폰트 적용
-
-```bash
-PROFILE="$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d \')"
-dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/use-system-font "false"
-dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/font "'Hack Nerd Font Mono 11'"
-```
-
-### Nerd Font 변형 구분
-
-| 변형 | 설명 |
-|------|------|
-| `Nerd Font` | 아이콘이 원래 너비 (가변폭) |
-| `Nerd Font Mono` | 아이콘이 1칸 고정폭 |
-| `Nerd Font Propo` | 비례폭(proportional) |
-| `NL` 접미사 | No Ligature — 리거처 제거 |
-
-터미널에서는 **Mono** 변형을 쓰는 게 정석이다.
-
-> **주의**: Nerd Font 설치 후 `fc-cache -fv`로 폰트 캐시를 반드시 갱신해야 한다. 캐시가 갱신되지 않으면 GNOME Terminal에서 글자 간격이 깨질 수 있다.
 
 ---
 
