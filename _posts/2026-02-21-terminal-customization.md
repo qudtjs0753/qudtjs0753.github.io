@@ -118,6 +118,56 @@ PROMPT_COMMAND → starship_precmd() → PS1 설정 (starship 바이너리 호�
 
 Starship 바이너리는 Rust로 작성되어 있어서 git 상태 파싱, 언어 버전 감지 등을 빠르게 수행하고, `~/.config/starship.toml` 설정에 따라 프롬프트를 렌더링한다.
 
+### bash는 PROMPT_COMMAND를 언제 실행하는가
+
+bash 5.2 소스코드의 `eval.c`를 보면 두 함수가 핵심이다.
+
+먼저 `PROMPT_COMMAND` 변수를 찾아서 실행하는 함수:
+
+```c
+// eval.c:290
+static void
+execute_prompt_command ()
+{
+  pcv = find_variable ("PROMPT_COMMAND");  // 변수 찾기
+  if (pcv == 0 || var_isset (pcv) == 0)
+    return;                                 // 없으면 스킵
+
+  command_to_execute = value_cell (pcv);    // 값 꺼내기
+  execute_variable_command (command_to_execute, "PROMPT_COMMAND");  // 실행
+}
+```
+
+그리고 이 함수를 호출하는 쪽:
+
+```c
+// eval.c:323
+int
+parse_command ()
+{
+  // 인터랙티브 셸이고, 프롬프트를 출력할 조건이면
+  if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
+    {
+      execute_prompt_command ();   // PROMPT_COMMAND 실행
+    }
+
+  r = yyparse ();   // 사용자 입력 대기 & 파싱
+  return (r);
+}
+```
+
+`parse_command()`는 bash의 메인 루프에서 다음 명령을 읽을 때마다 호출된다. 흐름을 정리하면:
+
+```
+parse_command()                        ← 매 명령 읽기 전 호출
+  → execute_prompt_command()           ← PROMPT_COMMAND 변수를 찾아 실행
+    → find_variable("PROMPT_COMMAND")
+    → execute_variable_command(...)    ← starship_precmd() 등이 여기서 실행
+  → yyparse()                          ← 프롬프트 표시, 사용자 입력 파싱
+```
+
+매 프롬프트마다 `PROMPT_COMMAND`가 실행되므로, git 브랜치를 바꾸거나 디렉토리를 이동하면 다음 프롬프트에 바로 반영되는 것이다.
+
 ### 왜 Oh My Bash를 제거하지 않는가
 
 `OSH_THEME=""`로 비워두면, `oh-my-bash.sh`의 테마 로딩 코드가 스킵된다:
