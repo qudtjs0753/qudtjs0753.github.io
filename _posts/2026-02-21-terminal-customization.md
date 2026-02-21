@@ -1,11 +1,11 @@
 ---
-title: "터미널 커스터마이징 — Gruvbox + Starship + Kitty 세팅 가이드"
+title: "터미널 커스터마이징 — Gruvbox + Starship + Nerd Font 세팅 가이드"
 date: 2026-02-21 16:20:54 +0900
 categories: [DevEnv]
-tags: [terminal, starship, kitty, gruvbox, nerd-font]
+tags: [terminal, starship, gruvbox, nerd-font]
 ---
 
-Ubuntu의 기본 터미널(GNOME Terminal)은 보라색 Yaru 테마에 밋밋한 프롬프트가 기본이다. 이번 글에서는 터미널 에뮬레이터를 Kitty로 교체하고, 프롬프트를 Starship으로 세팅하고, Gruvbox Dark 테마를 적용하는 과정을 정리한다.
+Ubuntu의 기본 터미널(GNOME Terminal)은 보라색 Yaru 테마에 밋밋한 프롬프트가 기본이다. 이번 글에서는 터미널 색상, 프롬프트, 폰트를 커스터마이징한 과정을 정리한다.
 
 ---
 
@@ -13,94 +13,29 @@ Ubuntu의 기본 터미널(GNOME Terminal)은 보라색 Yaru 테마에 밋밋한
 
 | 항목 | Before | After |
 |------|--------|-------|
-| 터미널 에뮬레이터 | GNOME Terminal | **Kitty** |
 | 색상 테마 | Yaru (보라색) | **Gruvbox Dark** |
 | 프롬프트 | Oh My Bash `font` 테마 | **Starship** (Gruvbox Rainbow) |
 | 폰트 | 시스템 기본 | **Hack Nerd Font Mono** |
 
 ---
 
-## 1. 터미널 에뮬레이터 교체 — GNOME Terminal에서 Kitty로
+## 1. 터미널 색상 변경 — Gruvbox Dark
 
-### 왜 Kitty인가
-
-GNOME Terminal 대신 Kitty를 선택한 이유:
-
-| | GNOME Terminal | Kitty |
-|---|---|---|
-| 렌더링 | VTE (CPU 기반) | GPU 가속 |
-| 폰트 설정 | 프로필에서 단일 폰트만 지정 | `symbol_map`으로 Unicode 범위별 폰트 지정 가능 |
-| Nerd Font 호환 | VTE가 글리프 너비를 잘못 계산하는 경우 있음 | 자체 렌더링 엔진으로 문제없음 |
-| 설정 방식 | GUI 또는 `dconf` | 텍스트 파일 (`kitty.conf`) — dotfiles로 관리하기 좋음 |
-| 창 분할 | 탭만 지원 | 자체 창 분할 + 탭 지원 |
-
-특히 `symbol_map`이 핵심이다. 영문은 Hack Nerd Font Mono, 한글은 Noto Sans CJK KR처럼 Unicode 범위별로 다른 폰트를 매핑할 수 있다.
-
-### Kitty 설치
+GNOME Terminal의 색상은 `dconf`로 변경할 수 있다. `dconf`는 GNOME 데스크톱의 설정 저장소로, 윈도우의 레지스트리와 비슷한 개념이다. GUI에서 환경설정을 바꾸는 것과 동일한 결과를 CLI로 수행한다.
 
 ```bash
-# 홈 디렉토리에 설치 (sudo 불필요)
-curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n
+PROFILE="$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d \')"
 
-# PATH 및 데스크톱 엔트리 설정
-ln -sf ~/.local/kitty.app/bin/kitty ~/.local/kitty.app/bin/kitten ~/.local/bin/
-cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/use-theme-colors "false"
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/background-color "'#282828'"
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/foreground-color "'#ebdbb2'"
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/bold-color-same-as-fg "true"
+
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/palette \
+  "['#282828', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#a89984', '#928374', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']"
 ```
 
-### Kitty 설정 — `~/.config/kitty/kitty.conf`
-
-```conf
-# Input Method (Korean)
-env GLFW_IM_MODULE=ibus
-env XMODIFIERS=@im=ibus
-
-# Font
-font_family      Hack Nerd Font Mono
-font_size        11.0
-
-# Fallback for Korean/CJK
-symbol_map U+1100-U+11FF,U+3130-U+318F,U+AC00-U+D7AF,U+D7B0-U+D7FF Noto Sans CJK KR
-
-# Gruvbox Dark color scheme
-foreground #ebdbb2
-background #282828
-
-color0  #282828
-color1  #cc241d
-color2  #98971a
-color3  #d79921
-color4  #458588
-color5  #b16286
-color6  #689d6a
-color7  #a89984
-color8  #928374
-color9  #fb4934
-color10 #b8bb26
-color11 #fabd2f
-color12 #83a598
-color13 #d3869b
-color14 #8ec07c
-color15 #ebdbb2
-
-# Cursor
-cursor #ebdbb2
-cursor_text_color #282828
-
-# Window
-window_padding_width 4
-confirm_os_window_close 0
-```
-
-### 한글 입력 설정 주의사항
-
-Kitty는 GLFW 기반이라 한글 입력(ibus)이 기본적으로 안 된다. `GLFW_IM_MODULE=ibus` 환경변수가 **Kitty 프로세스 시작 전에** 설정되어야 한다.
-
-```bash
-# ~/.profile에 추가 (로그인 시 시스템 전체 적용)
-export GLFW_IM_MODULE=ibus
-```
-
-> `kitty.conf`의 `env` 지시문은 kitty 안의 자식 프로세스(셸)에만 적용된다. kitty 자체의 IM 모듈 로딩에는 영향을 주지 않으므로, 반드시 `~/.profile` 등 로그인 환경에서 설정해야 한다.
+Gruvbox는 따뜻한 갈색-검정 배경에 크림색 글자가 특징인 레트로 다크 테마다.
 
 ---
 
@@ -251,6 +186,14 @@ tar -xf Hack.tar.xz && rm Hack.tar.xz
 fc-cache -fv ~/.local/share/fonts
 ```
 
+### GNOME Terminal에 폰트 적용
+
+```bash
+PROFILE="$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d \')"
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/use-system-font "false"
+dconf write /org/gnome/terminal/legacy/profiles:/:$PROFILE/font "'Hack Nerd Font Mono 11'"
+```
+
 ### Nerd Font 변형 구분
 
 | 변형 | 설명 |
@@ -262,19 +205,7 @@ fc-cache -fv ~/.local/share/fonts
 
 터미널에서는 **Mono** 변형을 쓰는 게 정석이다.
 
----
-
-## 터미널 에뮬레이터 vs tmux
-
-혼동하기 쉬운 개념이니 정리한다.
-
-| | 터미널 에뮬레이터 | tmux |
-|---|---|---|
-| 역할 | 화면에 글자를 그리는 **창 프로그램** | 터미널 안에서 **세션/분할** 관리 |
-| 예시 | GNOME Terminal, Kitty, Alacritty | tmux, screen |
-| 폰트 렌더링 | 담당함 | 관여 안 함 |
-
-Kitty로 바꿔도 tmux는 그 안에서 그대로 사용할 수 있다. Kitty 자체에도 창 분할 기능이 있으니 tmux 없이도 가능하다.
+> **주의**: Nerd Font 설치 후 `fc-cache -fv`로 폰트 캐시를 반드시 갱신해야 한다. 캐시가 갱신되지 않으면 GNOME Terminal에서 글자 간격이 깨질 수 있다.
 
 ---
 
@@ -284,6 +215,4 @@ Kitty로 바꿔도 tmux는 그 안에서 그대로 사용할 수 있다. Kitty �
 |------|-----------|
 | `~/.bashrc` | Oh My Bash 테마 비활성화 + Starship init 추가 |
 | `~/.config/starship.toml` | Gruvbox Rainbow 프리셋 |
-| `~/.config/kitty/kitty.conf` | Gruvbox 색상 + Hack Nerd Font + 한글 설정 |
 | `~/.local/share/fonts/` | Hack Nerd Font 설치 |
-| `~/.profile` | `GLFW_IM_MODULE=ibus` 환경변수 |
