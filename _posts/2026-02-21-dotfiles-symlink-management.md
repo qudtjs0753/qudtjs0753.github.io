@@ -2,12 +2,11 @@
 title: "dotfiles 심볼릭 링크로 관리하기"
 date: 2026-02-21 16:00:00 +0900
 categories: [DevEnv]
-tags: [dotfiles, symlink]
+tags: [dotfiles]
 ---
 
 개발 환경 설정 파일(dotfiles)을 Git 저장소와 심볼릭 링크로 관리하는 방법을 정리했다.<br/>
 `git clone` + `install.sh` 한 줄로 동일한 환경을 구성할 수 있도록 설정해보았다.</br>
-github link : [qudtjs0753/dotfiles](https://github.com/qudtjs0753/dotfiles)
 
 ---
 
@@ -42,16 +41,6 @@ dotfiles/
 ├── install.sh
 └── README.md
 ```
-
-관리 대상 파일은 다음과 같다.
-
-| 파일 | 역할 |
-|------|------|
-| `.bashrc` | NVM, direnv hook, 환경변수 설정 |
-| `.gitconfig` | Git 사용자 이름/이메일 |
-| `.vimrc` | vim-plug, 한국어 인코딩, 검색 설정 |
-| `.claude/commands/blog.md` | Claude Code `/blog` 커맨드 |
-
 ---
 
 ## install.sh 코드 분석
