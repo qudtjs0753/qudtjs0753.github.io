@@ -3,11 +3,14 @@
 ## 글 작성/배포 워크플로우
 
 ```
-1. _posts/ 폴더에 새 글 작성 (YYYY-MM-DD-제목.md)
-2. 로컬에서 확인: bundle exec jekyll serve
-3. git add → git commit → git push
-4. GitHub Actions가 자동으로 빌드 & 배포 (약 1~2분)
-5. https://qudtjs0753.github.io 에서 확인
+0. git pull origin main으로 최신 상태 동기화
+1. post/YYYY-MM-DD-제목 브랜치 생성
+2. _posts/ 폴더에 새 글 작성 (YYYY-MM-DD-제목.md)
+3. 로컬에서 확인: bundle exec jekyll serve
+4. git add → git commit (수정하며 커밋 반복)
+5. main 브랜치에 squash and merge 후 push
+6. GitHub Actions가 자동으로 빌드 & 배포 (약 1~2분)
+7. https://qudtjs0753.github.io 에서 확인
 ```
 
 ## 자주 사용할 명령어
@@ -16,10 +19,24 @@
 # 로컬 미리보기
 bundle exec jekyll serve
 
-# 변경사항 배포
-git add .
+# 최신 상태 동기화
+git pull origin main
+
+# 글 작성 브랜치 생성
+git checkout -b post/YYYY-MM-DD-제목
+
+# 작성 중 커밋 (반복)
+git add _posts/YYYY-MM-DD-제목.md
 git commit -m "커밋 메시지"
+
+# main에 squash merge 후 push
+git checkout main
+git merge --squash post/YYYY-MM-DD-제목
+git commit -m "최종 커밋 메시지"
 git push
+
+# 사용 완료한 브랜치 삭제
+git branch -d post/YYYY-MM-DD-제목
 
 # 빌드 상태 확인
 gh run list --repo qudtjs0753/qudtjs0753.github.io --limit 3
