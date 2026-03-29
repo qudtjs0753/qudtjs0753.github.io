@@ -64,6 +64,13 @@ gh run view <run-id> --repo qudtjs0753/qudtjs0753.github.io --log
 - 경로 예시가 필요하면 `~/dotfiles`, `/home/user/dotfiles` 같은 일반적인 표현을 사용한다
 
 
+## AI 작성 글 명시 규칙
+
+- AI Agent가 작성한 글은 front matter 바로 아래에 다음 문구를 반드시 추가한다:
+  ```
+  > 이 글은 AI Agent가 작성했습니다.
+  ```
+
 ## 글 구조 규칙
 
 - 글 상단에 **변경 후의 최종 결과**(스크린샷, 요약 테이블 등)를 먼저 보여준다
