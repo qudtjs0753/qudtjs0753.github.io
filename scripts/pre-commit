@@ -1,0 +1,34 @@
+#!/bin/bash
+
+STAGED=$(git diff --cached --name-only | grep '^_posts/.*\.md$' || true)
+[ -z "$STAGED" ] && exit 0
+
+FAILED=0
+
+for FILE in $STAGED; do
+  # 검사 1: 개인 경로 포함 여부
+  PRIVATE_PATHS=$(grep -nE '/home/[a-z]+/' "$FILE" | grep -vE '/home/user/' || true)
+  if [ -n "$PRIVATE_PATHS" ]; then
+    echo "❌ [$FILE] 개인 경로가 포함되어 있습니다:"
+    echo "$PRIVATE_PATHS"
+    FAILED=1
+  fi
+
+  # 검사 2: 참고 자료 섹션 존재 여부
+  if ! grep -q '^## 참고 자료' "$FILE"; then
+    echo "❌ [$FILE] '## 참고 자료' 섹션이 없습니다. 글 하단에 추가해주세요."
+    FAILED=1
+  fi
+
+  # 검사 3: 참고 자료 섹션 URL HTTP 상태 확인 (경고만, 차단 X)
+  SECTION=$(awk '/^## 참고 자료/,0' "$FILE")
+  URLS=$(echo "$SECTION" | grep -oE 'https?://[^)]+' || true)
+  for URL in $URLS; do
+    STATUS=$(curl -o /dev/null -s -w "%{http_code}" --max-time 5 "$URL" || echo "000")
+    if [ "$STATUS" != "200" ]; then
+      echo "⚠️  [$FILE] URL 응답 $STATUS: $URL"
+    fi
+  done
+done
+
+[ $FAILED -eq 0 ] || exit 1

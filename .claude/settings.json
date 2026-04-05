@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '\n  FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"file_path\\\",\\\"\\\"))\" 2>/dev/null)\n  [[ \"$FILE\" == */_posts/*.md ]] || exit 0\n  WARNINGS=\"\"\n  TAGS=$(grep -m1 \"^tags:\" \"$FILE\" 2>/dev/null || true)\n  if echo \"$TAGS\" | grep -qE \"tags:\\s*\\[\\s*\\]\"; then\n    WARNINGS+=\"\\n⚠️  tags가 비어있습니다. front matter에 태그를 추가해주세요.\"\n  fi\n  if ! grep -q \"이 글은 AI Agent가 작성했습니다\" \"$FILE\" 2>/dev/null; then\n    WARNINGS+=\"\\n⚠️  AI Agent 작성 명시 문구가 없습니다. front matter 아래에 추가해주세요:\\n    > 이 글은 AI Agent가 작성했습니다.\"\n  fi\n  [ -z \"$WARNINGS\" ] || echo -e \"[블로그 포스트 점검]$WARNINGS\"\n'"
+          }
+        ]
+      }
+    ]
+  }
+}

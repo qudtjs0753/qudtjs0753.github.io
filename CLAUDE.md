@@ -62,6 +62,7 @@ gh run view <run-id> --repo qudtjs0753/qudtjs0753.github.io --log
 
 - 블로그 포스트에 실제 개인 폴더 경로(예: `/home/helloworld/`, `/home/사용자명/workspace/` 등)를 절대 포함하지 않는다
 - 경로 예시가 필요하면 `~/dotfiles`, `/home/user/dotfiles` 같은 일반적인 표현을 사용한다
+- 위반 시 pre-commit hook이 커밋을 차단한다
 
 
 ## AI 작성 글 명시 규칙
@@ -100,8 +101,12 @@ gh run view <run-id> --repo qudtjs0753/qudtjs0753.github.io --log
 
 ## 커밋 전 점검 사항
 
-- **참고 자료 링크**: 글에서 참고한 자료가 있으면 반드시 글 하단에 링크를 포함한다
-- **링크 접근 확인**: 커밋 전에 모든 참고 자료 URL이 접근 가능한지(HTTP 200) 점검한다
+> 아래 항목 중 일부는 pre-commit hook이 자동으로 처리한다 (개인 경로, 참고 자료 섹션, URL 접근 확인)
+> hook 스크립트는 `scripts/pre-commit`에 있다. 새로 클론한 경우 아래 명령으로 설치한다:
+> ```bash
+> ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+> ```
+
 - **한글 자연스러움 점검**: 커밋 전에 본문을 다시 읽고 어색한 표현이 없는지 확인한다
 - **코드 예시 점검**: 글에 코드 예시가 포함된 경우, 문법 오류나 API 사용 실수가 없는지 확인한다
 
@@ -109,8 +114,6 @@ gh run view <run-id> --repo qudtjs0753/qudtjs0753.github.io --log
 
 ```
 ## 커밋 전 점검
-- [x] 참고 자료 링크 포함 확인
-- [x] URL 접근 가능 여부 확인 (N개 중 N개 OK)
 - [ ] 한글 자연스러움 점검 중...
 - [ ] 코드 예시 점검 대기
 ```
