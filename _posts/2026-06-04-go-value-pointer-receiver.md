@@ -331,3 +331,88 @@ Go는 메서드 테이블 불일치만으로 컴파일 에러를 낸다. 복사 
 한 타입에 메서드가 여러 개면 **전부 포인터 또는 전부 값으로 통일**하는 것이 Go 관례다. 섞으면 인터페이스 구현 시 `*T`로만 담아야 하는지 `T`로도 되는지 혼란이 생긴다.
 
 `pool`, `client`, `mutex`를 들고 있으면 포인터로 통일한다. 그 외에는 수정 필요 여부와 복사 비용을 기준으로 결정한다.
+
+---
+
+## 리시버는 반드시 구체 타입에 붙인다
+
+Go를 처음 접하면 "인터페이스에도 리시버를 붙일 수 있지 않나?"라는 의문이 생긴다. 결론부터 말하면 **불가능하다**.
+
+```go
+type UserRepository interface {
+    FindOrCreate(ctx context.Context, kakaoID string) (*User, error)
+}
+
+// 이건 불가능
+func (r UserRepository) FindOrCreate(...) {
+    r.pool.QueryRow(...)  // ← 인터페이스에는 필드가 없다
+}
+```
+
+인터페이스는 "이 메서드들이 있어야 한다"는 **계약(contract)**만 정의한다. `pool`이나 `client` 같은 필드가 없으니 실제 동작을 구현할 수 없다.
+
+리시버는 항상 구체 타입(구조체)에 붙인다.
+
+```go
+// 구체 타입에 붙이는 것만 가능
+func (r *PostgresUserRepository) FindOrCreate(...) {
+    r.pool.QueryRow(...)  // pool 필드가 있으니 실행 가능
+}
+```
+
+Java와 비교하면:
+
+```java
+// Java — 인터페이스에는 구현 없음
+interface UserRepository {
+    User findOrCreate(String kakaoId);
+}
+
+// 클래스(구체 타입)에 구현
+class PostgresUserRepository implements UserRepository {
+    private Pool pool;  // 필드가 있어야 구현 가능
+
+    public User findOrCreate(String kakaoId) { ... }
+}
+```
+
+Go의 리시버 = Java의 클래스 내부 메서드 구현. 역할이 동일하다.
+
+---
+
+## 생성자는 인터페이스를 반환한다
+
+구체 타입에 리시버를 붙이되, **외부에 노출할 때는 인터페이스를 반환**하는 것이 Go 관례다.
+
+```go
+// 구체 타입 반환 — 호출하는 쪽이 PostgresUserRepository에 직접 의존
+func NewPostgresUserRepository(pool *pgxpool.Pool) *PostgresUserRepository {
+    return &PostgresUserRepository{pool: pool}
+}
+
+// 인터페이스 반환 — 호출하는 쪽은 UserRepository만 알면 됨
+func NewPostgresUserRepository(pool *pgxpool.Pool) domain.UserRepository {
+    return &PostgresUserRepository{pool: pool}  // 내부에서는 구체 타입으로 생성
+}
+```
+
+인터페이스를 반환하면 두 가지 이점이 있다.
+
+**1. 구현체 교체가 자유롭다** — 나중에 MySQL로 바꾸더라도 호출하는 쪽 코드를 건드리지 않아도 된다.
+
+**2. 테스트에서 mock으로 교체할 수 있다** — 실제 DB 없이 인터페이스를 구현한 mock 구조체로 대체 가능하다.
+
+```go
+// service는 domain.UserRepository 인터페이스에만 의존
+type AuthService struct {
+    userRepo domain.UserRepository  // PostgresUserRepository인지 MockUserRepository인지 모름
+}
+
+// 테스트에서 mock 주입
+svc := NewAuthService(MockUserRepository{})
+
+// 프로덕션에서 실제 구현체 주입
+svc := NewAuthService(NewPostgresUserRepository(pool))
+```
+
+리시버는 구체 타입에, 반환은 인터페이스로 — 이 두 원칙이 Clean Architecture에서 의존성을 역전시키는 핵심이다.
